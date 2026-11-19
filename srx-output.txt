@@ -1,0 +1,58 @@
+=== Test 1-4, 2026-11-17 12:01:54
+show interfaces terse | match "ge-0/0/[1-4].0" 
+ge-0/0/1.0              up    up   inet     192.168.3.1/24  
+ge-0/0/2.0              up    up   inet     192.168.4.1/24  
+ge-0/0/3.0              up    up   inet     10.56.16.85/22  
+ge-0/0/4.0              up    up   inet     2.2.2.2/24      
+
+root@SRX-C1> show forwarding-options port-mirroring 
+Instance Name: &global_instance               
+  Instance Id: 1              
+  Input parameters:
+    Rate                  : 1
+    Run-length            : 0
+    Maximum-packet-length : 0
+  Output parameters:
+    Family      State     Destination          Next-hop
+    inet        up        ge-0/0/4.0           2.2.2.1             
+
+root@SRX-C1> show interfaces ge-0/0/2.0 extensive | match ilter 
+      Input Filters: my-port-filter
+      Output Filters: my-port-filter
+
+root@SRX-C1> show arp no-resolve 
+MAC Address       Address         Interface     Flags
+90:2e:16:68:ae:cd 2.2.2.1         ge-0/0/4.0           none
+3c:61:04:66:12:01 10.56.16.1      ge-0/0/3.0           none
+34:5a:60:29:94:d8 192.168.3.100   ge-0/0/1.0           none
+68:f7:28:be:46:85 192.168.4.10    ge-0/0/2.0           none
+Total entries: 4
+
+root@SRX-C1> 
+PC4: ping -c 3 2.2.2.2 -> 3/3 svar
+
+=== SYN flood 2026-11-17, session summary før
+show security flow session summary 
+Unicast-sessions: 22
+Multicast-sessions: 0
+Failed-sessions: 5156574
+Sessions-in-use: 24
+  Valid sessions: 22
+  Pending sessions: 0
+  Invalidated sessions: 2
+  Sessions in other states: 0
+Maximum-sessions: 131072
+root@SRX-C1> 
+
+=== Under SYN flood
+show security flow session summary 
+Unicast-sessions: 17
+Multicast-sessions: 0
+Failed-sessions: 5156574
+Sessions-in-use: 25
+  Valid sessions: 17
+  Pending sessions: 0
+  Invalidated sessions: 8
+  Sessions in other states: 0
+Maximum-sessions: 131072
+root@SRX-C1> 

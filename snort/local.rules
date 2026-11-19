@@ -1,0 +1,7 @@
+# Assignment 35 - SYN flood mod WebServer (PC3) i DMZ
+# Alarm når mere end 100 TCP-pakker med kun SYN sat rammer 192.168.4.10:80 inden for 1 sekund.
+# Pakkerne ses efter destination NAT, derfor 192.168.4.10 og ikke 10.56.16.85.
+alert tcp any any -> 192.168.4.10 80 ( msg:"ASS35 TCP SYN flood mod WebServer"; flags:S; detection_filter:track by_dst, count 100, seconds 1; classtype:attempted-dos; sid:1000035; rev:1; )
+
+# Hjælperegel til test: én alarm pr. almindelig HTTP-forbindelse, så vi kan se at Snort overhovedet ser trafikken.
+# alert tcp any any -> 192.168.4.10 80 ( msg:"ASS35 ny forbindelse til WebServer"; flags:S; sid:1000036; rev:1; )

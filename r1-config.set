@@ -1,0 +1,74 @@
+set system host-name SRX-C1
+set system services ssh
+set system services dhcp pool 192.168.3.0/24 address-range low 192.168.3.100
+set system services dhcp pool 192.168.3.0/24 address-range high 192.168.3.200
+set system services dhcp pool 192.168.3.0/24 router 192.168.3.1
+set system services dhcp pool 192.168.3.0/24 name-server 8.8.8.8
+
+set interfaces ge-0/0/1 description "USERLAN routed gateway - patch to ge-0/0/10"
+set interfaces ge-0/0/1 unit 0 family inet address 192.168.3.1/24
+set interfaces ge-0/0/2 description "DMZ routed gateway - patch to ge-0/0/6 - MIRRORED"
+set interfaces ge-0/0/2 unit 0 family inet address 192.168.4.1/24
+set interfaces ge-0/0/3 description "LabLan uplink to R3"
+set interfaces ge-0/0/3 unit 0 family inet address 10.56.16.85/22
+set interfaces ge-0/0/4 description "MonitorLan - mirror output to PC4"
+set interfaces ge-0/0/4 unit 0 family inet address 2.2.2.2/24
+
+set interfaces ge-0/0/6 description "mySwitch1Vlan DMZ - patch from ge-0/0/2"
+set interfaces ge-0/0/6 unit 0 family ethernet-switching vlan members mySwitch1Vlan
+set interfaces ge-0/0/7 description "mySwitch1Vlan DMZ - myWebServer PC3"
+set interfaces ge-0/0/7 unit 0 family ethernet-switching vlan members mySwitch1Vlan
+set interfaces ge-0/0/10 description "mySwitch2Vlan USERLAN - patch from ge-0/0/1"
+set interfaces ge-0/0/10 unit 0 family ethernet-switching vlan members mySwitch2Vlan
+set interfaces ge-0/0/11 description "mySwitch2Vlan USERLAN - PC1"
+set interfaces ge-0/0/11 unit 0 family ethernet-switching vlan members mySwitch2Vlan
+set interfaces ge-0/0/12 description "mySwitch2Vlan USERLAN - unused"
+set interfaces ge-0/0/12 unit 0 family ethernet-switching vlan members mySwitch2Vlan
+
+set vlans mySwitch1Vlan vlan-id 4
+set vlans mySwitch2Vlan vlan-id 3
+
+set firewall filter my-port-filter term myMirrorTerm from source-address 0.0.0.0/0
+set firewall filter my-port-filter term myMirrorTerm then count mirror-count
+set firewall filter my-port-filter term myMirrorTerm then port-mirror
+set firewall filter my-port-filter term myMirrorTerm then accept
+set interfaces ge-0/0/2 unit 0 family inet filter input my-port-filter
+set interfaces ge-0/0/2 unit 0 family inet filter output my-port-filter
+set forwarding-options port-mirroring input rate 1
+set forwarding-options port-mirroring family inet output interface ge-0/0/4.0 next-hop 2.2.2.1
+
+set routing-options static route 0.0.0.0/0 next-hop 10.56.16.1
+
+set security zones security-zone USERLAN host-inbound-traffic system-services all
+set security zones security-zone DMZ host-inbound-traffic system-services ping
+set security zones security-zone untrust host-inbound-traffic system-services ping
+set security zones security-zone MONITOR host-inbound-traffic system-services ping
+set security zones security-zone USERLAN interfaces ge-0/0/1.0
+set security zones security-zone DMZ interfaces ge-0/0/2.0
+set security zones security-zone untrust interfaces ge-0/0/3.0
+set security zones security-zone MONITOR interfaces ge-0/0/4.0
+set security zones security-zone DMZ address-book address webserver 192.168.4.10/32
+
+set security nat source rule-set soho from zone USERLAN
+set security nat source rule-set soho from zone DMZ
+set security nat source rule-set soho to zone untrust
+set security nat source rule-set soho rule hide-inside match source-address 0.0.0.0/0
+set security nat source rule-set soho rule hide-inside then source-nat interface
+set security nat destination pool webserver-pool address 192.168.4.10/32
+set security nat destination rule-set from-lablan from zone untrust
+set security nat destination rule-set from-lablan rule to-web match destination-address 10.56.16.85/32
+set security nat destination rule-set from-lablan rule to-web match destination-port 80
+set security nat destination rule-set from-lablan rule to-web then destination-nat pool webserver-pool
+
+set security policies from-zone USERLAN to-zone untrust policy permit-internet match source-address any
+set security policies from-zone USERLAN to-zone untrust policy permit-internet match destination-address any
+set security policies from-zone USERLAN to-zone untrust policy permit-internet match application any
+set security policies from-zone USERLAN to-zone untrust policy permit-internet then permit
+set security policies from-zone USERLAN to-zone DMZ policy permit-web match source-address any
+set security policies from-zone USERLAN to-zone DMZ policy permit-web match destination-address any
+set security policies from-zone USERLAN to-zone DMZ policy permit-web match application any
+set security policies from-zone USERLAN to-zone DMZ policy permit-web then permit
+set security policies from-zone untrust to-zone DMZ policy permit-web-dnat match source-address any
+set security policies from-zone untrust to-zone DMZ policy permit-web-dnat match destination-address webserver
+set security policies from-zone untrust to-zone DMZ policy permit-web-dnat match application junos-http
+set security policies from-zone untrust to-zone DMZ policy permit-web-dnat then permit

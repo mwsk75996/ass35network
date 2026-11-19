@@ -1,0 +1,252 @@
+--------------------------------------------------
+o")~   Snort++ 3.10.0.0
+--------------------------------------------------
+Loading /home/snorty/snort3/etc/snort/snort.lua:
+Loading snort_defaults.lua:
+Finished snort_defaults.lua:
+	port_scan
+	smtp
+	ftp_server
+	http_inspect
+	http2_inspect
+	file_policy
+	js_norm
+	appid
+	wizard
+	binder
+	references
+	classifications
+	ftp_data
+	ips
+	file_id
+	ftp_client
+	decode
+	so_proxy
+	mms
+	dnp3
+	cip
+	telnet
+	ssl
+	ssh
+	sip
+	rpc_decode
+	pop
+	normalizer
+	netflow
+	imap
+	dns
+	back_orifice
+	arp_spoof
+	stream_file
+	trace
+	stream_user
+	stream_udp
+	stream_tcp
+	stream_icmp
+	stream_ip
+	stream
+	network
+	packets
+	active
+	alerts
+	daq
+	output
+	host_cache
+	host_tracker
+	hosts
+	process
+	search_engine
+	iec104
+	modbus
+	opcua
+	s7commplus
+	dce_smb
+	dce_tcp
+	dce_udp
+	dce_http_proxy
+	dce_http_server
+	gtp_inspect
+Finished /home/snorty/snort3/etc/snort/snort.lua:
+Loading file_id.rules_file:
+Loading file_magic.rules:
+Finished file_magic.rules:
+Finished file_id.rules_file:
+Loading rule args:
+Loading /rules/local.rules:
+Finished /rules/local.rules:
+Finished rule args:
+--------------------------------------------------
+ips policies rule stats
+              id  loaded  shared enabled    file
+               0     221       0     221    /home/snorty/snort3/etc/snort/snort.lua
+--------------------------------------------------
+rule counts
+       total rules loaded: 221
+               text rules: 221
+            option chains: 221
+            chain headers: 2
+--------------------------------------------------
+port rule counts
+             tcp     udp    icmp      ip
+     dst       2       0       0       0
+   total       2       0       0       0
+--------------------------------------------------
+service rule counts          to-srv  to-cli
+                  file_id:      219     219
+                    total:      219     219
+--------------------------------------------------
+fast pattern groups
+                to_server: 1
+                to_client: 1
+--------------------------------------------------
+search engine (ac_bnfa)
+                instances: 2
+                 patterns: 438
+            pattern chars: 2602
+               num states: 1832
+         num match states: 392
+             memory scale: KB
+             total memory: 71.2812
+           pattern memory: 19.6484
+        match list memory: 28.4375
+        transition memory: 22.9453
+appid: MaxRss diff: 2976
+appid: patterns loaded: 300
+--------------------------------------------------
+pcap DAQ configured to passive.
+Commencing packet processing
+Retry queue interval is: 200 ms
+++ [0] enp0s31f6
+** caught int signal
+== stopping
+11/17-11:12:55.671884 [**] [1:1000036:1] "ASS35 ny forbindelse til WebServer" [**] [Priority: 0] {TCP} 10.228.31.98:50838 -> 192.168.4.10:80
+11/17-11:13:04.530917 [**] [1:1000036:1] "ASS35 ny forbindelse til WebServer" [**] [Priority: 0] {TCP} 10.228.31.98:39108 -> 192.168.4.10:80
+11/17-11:13:13.352730 [**] [1:1000036:1] "ASS35 ny forbindelse til WebServer" [**] [Priority: 0] {TCP} 10.228.31.98:59514 -> 192.168.4.10:80
+-- [0] enp0s31f6
+--------------------------------------------------
+Packet Statistics
+--------------------------------------------------
+daq
+                 received: 50
+                 analyzed: 50
+                    allow: 50
+                 rx_bytes: 9190
+--------------------------------------------------
+codec
+                    total: 50          	(100.000%)
+                 discards: 3           	(  6.000%)
+                      eth: 50          	(100.000%)
+                     ipv4: 50          	(100.000%)
+                      tcp: 39          	( 78.000%)
+                      udp: 8           	( 16.000%)
+--------------------------------------------------
+Module Statistics
+--------------------------------------------------
+ac_full
+                 searches: 27
+                  matches: 21
+                    bytes: 1263
+--------------------------------------------------
+appid
+                  packets: 47
+        processed_packets: 47
+           total_sessions: 11
+       service_cache_adds: 3
+             bytes_in_use: 504
+             items_in_use: 3
+--------------------------------------------------
+back_orifice
+                  packets: 8
+--------------------------------------------------
+binder
+              raw_packets: 3
+                new_flows: 11
+          service_changes: 3
+                 inspects: 14
+--------------------------------------------------
+detection
+                 analyzed: 50
+               hard_evals: 21
+                   alerts: 3
+             total_alerts: 3
+                   logged: 3
+--------------------------------------------------
+dns
+                  packets: 6
+                 requests: 6
+             dns_over_udp: 6
+--------------------------------------------------
+http_inspect
+                    flows: 3
+                    scans: 12
+              reassembles: 12
+              inspections: 12
+                 requests: 3
+                responses: 3
+             get_requests: 3
+  max_concurrent_sessions: 3
+              total_bytes: 660
+--------------------------------------------------
+ips_actions
+                    alert: 3
+--------------------------------------------------
+port_scan
+                  packets: 47
+                 trackers: 8
+--------------------------------------------------
+search_engine
+     non_qualified_events: 18
+         qualified_events: 3
+--------------------------------------------------
+stream
+                    flows: 11
+--------------------------------------------------
+stream_tcp
+                 sessions: 6
+                      max: 6
+                  created: 6
+                 released: 6
+             instantiated: 6
+                   setups: 6
+                 restarts: 3
+             syn_trackers: 6
+              segs_queued: 6
+            segs_released: 6
+                segs_used: 6
+          rebuilt_packets: 12
+            rebuilt_bytes: 696
+                     syns: 12
+                 syn_acks: 3
+                     fins: 3
+                 max_segs: 1
+                max_bytes: 157
+--------------------------------------------------
+stream_udp
+                 sessions: 5
+                      max: 5
+                  created: 5
+                 released: 5
+              total_bytes: 898
+--------------------------------------------------
+wizard
+                tcp_scans: 3
+                 tcp_hits: 3
+                udp_scans: 1
+               udp_misses: 1
+--------------------------------------------------
+Appid Statistics
+--------------------------------------------------
+detected apps and services
+              Application: Services   Clients    Users      Payloads   Misc       Referred  
+                  unknown: 3          7          0          3          0          0         
+--------------------------------------------------
+Summary Statistics
+--------------------------------------------------
+process
+                  signals: 1
+--------------------------------------------------
+timing
+                  runtime: 00:00:39
+                  seconds: 39.303119
+                 pkts/sec: 1
+o")~   Snort exiting
