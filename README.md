@@ -107,7 +107,7 @@ Optaget 2026-11-17 på PC4 (`enp0s31f6`) med `dumpcap -i enp0s31f6 -a duration:1
 14  192.168.4.10 → 8.8.8.8       DNS   Standard query A ntp.ubuntu.com
 ```
 
-Vi kan se hele forbindelsen begge veje: three-way handshake, GET, 200 OK og lukning. PC4 er ikke en del af forbindelsen, så den ser den kun fordi ge-0/0/2 bliver spejlet. Destinationen er 192.168.4.10, altså adressen efter destination NAT. Pakke 14 er PC3s egen DNS-forespørgsel, som ikke får svar, fordi DMZ ikke har en policy mod untrust.
+Vi kan se hele forbindelsen begge veje: three-way handshake, GET, 200 OK og lukning. PC4 var selv klienten over Wi-Fi (wlan0), men optagelsen er lavet på det kablede kort enp0s31f6, som ikke er en del af forbindelsen. Den ser kun forbindelsen fordi ge-0/0/2 bliver spejlet. Destinationen er 192.168.4.10, altså adressen efter destination NAT. Pakke 14 er PC3s egen DNS-forespørgsel, som ikke får svar, fordi DMZ ikke har en policy mod untrust.
 
 ![Spejlet HTTP-trafik i Wireshark på PC4](wireshark-dmz-mirror-http.png)
 
