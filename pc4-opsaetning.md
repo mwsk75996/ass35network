@@ -75,16 +75,34 @@ Alternativ uden Docker: `yay -S snort` (AUR, bygger Snort 3 fra kilde, tager lan
 alert tcp any any -> 192.168.4.10 80 ( msg:"ASS35 TCP SYN flood mod WebServer"; flags:S; detection_filter:track by_dst, count 100, seconds 1; classtype:attempted-dos; sid:1000035; rev:1; )
 ```
 
-`flags:S` matcher pakker hvor kun SYN er sat. `detection_filter` gør at reglen først giver alarm når der er kommet mere end 100 af dem til samme destination på ét sekund. Normal browsing laver nogle få SYN pr. sekund og udløser den ikke.
+`flags:S` matcher pakker hvor kun SYN er sat. `detection_filter` gør at reglen først giver alarm når der er kommet mere end 100 af dem til samme destination inden for samme sekund. Snort tæller i hele sekunder på uret, så de første alarmer kan komme lidt senere end efter 100 pakker (se README, "Resultat"). Normal browsing laver nogle få SYN pr. sekund og udløser den ikke.
 
 Regel 1000036 giver alarm på hver ny forbindelse og bruges kun til at vise at Snort ser trafikken. Den kommenteres ud med `#` før SYN flood-testen, ellers fylder den terminalen.
 
 ## 5. Angriberen (PC1 flyttet til LabLan)
 
-Flyt PC1s kabel fra ge-0/0/11 til en LabLan-port, så den får en 10.56.x.x-adresse med DHCP. Installer hping3 hvis det mangler (`sudo apt install hping3` eller `sudo pacman -S hping`).
+PC1 er Sebastians laptop med Windows. hping3 findes ikke til Windows, så vi brugte `nping`, som følger med Nmap.
+
+Flyt PC1s kabel fra ge-0/0/11 til en LabLan-port, så den får en 10.56.x.x-adresse med DHCP. Under testen fik den 10.56.18.11.
+
+Hvis VMware er installeret, så slå VMnet8 fra først. På Sebastians laptop havde den 10.56.16.1/24, og så sendte Windows trafikken til 10.56.16.85 ud på det virtuelle net i stedet for netkortet. Kør i PowerShell som administrator:
 
 ```
-sudo hping3 -S -p 80 --flood 10.56.16.85
+Disable-NetAdapter -Name "VMware Network Adapter VMnet8"
 ```
 
-Kør i højst 10 sekunder og stop med Ctrl-C. LabLan er skolens fælles net. Angrebet går mod vores egen DNAT-adresse og rammer kun vores webserver.
+Start angrebet, stadig i PowerShell som administrator:
+
+```
+nping -e eth0 -H --tcp -p 80 --flags syn --rate 1000 -c 10000 10.56.16.85
+```
+
+Det sender 10.000 SYN-pakker med 1000 i sekundet, altså ca. 10 sekunder. `-e eth0` er det kablede netkort i nping's navngivning (`nping --iflist` viser listen). LabLan er skolens fælles net. Angrebet går mod vores egen DNAT-adresse og rammer kun vores webserver.
+
+Slå VMnet8 til igen bagefter:
+
+```
+Enable-NetAdapter -Name "VMware Network Adapter VMnet8"
+```
+
+På Linux kan det samme gøres med hping3: `sudo hping3 -S -p 80 -i u1000 -c 10000 10.56.16.85`. Det er ikke testet her.

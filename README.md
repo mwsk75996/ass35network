@@ -17,7 +17,7 @@ På SRX240 sker det på lag 3. Kopien sendes som en almindelig IP-pakke til next
 
 ### Hvad er et IDS
 
-Et Intrusion Detection System læser trafik og sammenligner den med regler. Når en regel matcher, skriver det en alarm. Det blokerer ikke selv trafikken, det gør et IPS. Her er Snort et netværksbaseret IDS: det sidder ikke på webserveren, men læser kopien fra mirror-porten. Reglen i `snort/local.rules` giver alarm når mere end 100 SYN-pakker rammer 192.168.4.10:80 på ét sekund.
+Et Intrusion Detection System læser trafik og sammenligner den med regler. Når en regel matcher, skriver det en alarm. Det blokerer ikke selv trafikken, det gør et IPS. Her er Snort et netværksbaseret IDS: det sidder ikke på webserveren, men læser kopien fra mirror-porten. Reglen i `snort/local.rules` giver alarm når mere end 100 SYN-pakker rammer 192.168.4.10:80 inden for samme sekund.
 
 ## Ændringer fra Assignment 34
 
@@ -86,15 +86,16 @@ Se [pc4-opsaetning.md](pc4-opsaetning.md). Kort fortalt: kablet i ge-0/0/4, stat
 | # | Opgave | Svar |
 |---|---|---|
 | 1 | Netværksdiagram med zoner | `HLD.pdf` og afsnittet "Adresser" ovenfor. Trust = USERLAN (ge-0/0/1), untrust = ge-0/0/3, DMZ = ge-0/0/2. ge-0/0/4 ligger i MONITOR |
-| 2 | Installation og kørsel af PC4 | `pc4-opsaetning.md` |
+| 2 | Installation og kørsel af PC4 | `pc4-opsaetning.md` afsnit 1 og 2 (kabel, adresse og Wireshark) |
 | 3 | Eksempel på spejlet trafik | Afsnittet "Spejlet trafik" nedenfor og `dmz-mirror-http.pcapng` |
-| 4 | Snort som netværksbaseret IDS (valgfri) | `pc4-opsaetning.md`, `snort/local.rules` og afsnittet "SYN flood og Snort" |
-| 5 | SYN flood fra LabLan (valgfri) | Afsnittet "SYN flood og Snort" nedenfor. nping i stedet for hping3 |
-| 6 | Konfiguration som .json og diagram som .pdf | `r1-config.json` og `HLD.pdf` |
+| 4 | Installér Snort eller Suricata på PC4, så den bliver et IDS | `pc4-opsaetning.md` afsnit 3. Vi valgte Snort 3 fra Cisco Talos' Docker-image |
+| 5 | Konfigurér PC4 som netværksbaseret IDS mod TCP SYN flood på webserveren | `snort/local.rules`, `pc4-opsaetning.md` afsnit 4 og afsnittet "Snort ser den spejlede trafik" nedenfor |
+| 6 | SYN flood fra LabLan, og ser IDS'et angrebet | Afsnittet "SYN flood og Snort" nedenfor. nping i stedet for hping3. Snort gav 9.802 alarmer |
+| 7 | Konfiguration som .json og diagram som .pdf | `r1-config.json` og `HLD.pdf` |
 
 ## Spejlet trafik
 
-Optaget 2026-11-17 på PC4 (`enp0s31f6`) med `dumpcap -i enp0s31f6 -a duration:12 -w dmz-mirror-http.pcapng`. PC3 kørte en webserver på port 80 (`sudo python3 -m http.server 80`). Imens hentede en maskine uden for routeren `http://10.56.16.85/`. Destination NAT sender forespørgslen videre ud af ge-0/0/2 til PC3, og derfor bliver den spejlet til PC4.
+Optaget 2026-11-17 på PC4 (`enp0s31f6`) med `dumpcap -i enp0s31f6 -a duration:12 -w dmz-mirror-http.pcapng`. PC3 kørte en webserver på port 80 (`sudo python3 -m http.server 80`). Imens hentede PC4 selv `http://10.56.16.85/` over sit Wi-Fi-kort (`wlan0`, 10.228.31.98 på skolens Wi-Fi). Forespørgslen gik over skolens net og LabLan ind på ge-0/0/3, altså samme vej som fra en maskine på LabLan. Klienten er tegnet med grøn prikket linje i `HLD.pdf`. Destination NAT sender forespørgslen videre ud af ge-0/0/2 til PC3, og derfor bliver den spejlet til PC4.
 
 ```
  2  10.228.31.98 → 192.168.4.10  TCP   40710 → 80 [SYN]
@@ -163,12 +164,20 @@ Første forsøg nåede ikke routeren. Sebastians VMware-adapter VMnet8 havde adr
 11/17-11:34:17.107585 [**] [1:1000035:1] "ASS35 TCP SYN flood mod WebServer" [**] [Classification: Attempted Denial of Service] [Priority: 2] {TCP} 10.56.18.11:9380 -> 192.168.4.10:80
 ```
 
-Snort opdagede altså angrebet. De første ca. 200 SYN-pakker gav ingen alarm, fordi `detection_filter` først slår til når der er kommet mere end 100 på et sekund. Derefter gav hver SYN en alarm.
+Snort opdagede altså angrebet. De første 198 SYN-pakker gav ingen alarm, og 10.000 − 198 = 9.802. Det skyldes måden `detection_filter` tæller på. Snort tæller i hele sekunder på uret og nulstiller tælleren når sekundet skifter. Det er altså ikke et glidende vindue på ét sekund. Det ses i Snort 3's kildekode (`src/filters/sfthd.cc`), hvor tiden er et `time_t` i hele sekunder.
+
+- Første SYN kom 12:34:16,897. Inden 12:34:17,000 nåede der kun at komme 98. Det er under 100, så ingen alarm.
+- Da sekundet skiftede til 12:34:17, blev tælleren nulstillet. De næste 100 SYN gav heller ingen alarm.
+- SYN nr. 199 kom 12:34:17,107586, og første alarm har tidsstemplet 11:34:17,107585 (Snort i Docker skriver UTC, derfor 11 og ikke 12).
+- Resten af angrebet gav hver SYN en alarm, også når sekundet skiftede. Snort husker antallet fra sekundet før, og det var over 100.
+
+98 + 100 = 198. Det passer med optællingen pr. sekund: i sekund 17 kom 952 SYN og 852 alarmer, i alle senere sekunder er tallene ens.
 
 ![SYN flood i Wireshark på PC4](wireshark-synflood.png)
 
-Optagelsen viser også to ting vi ikke havde regnet med:
+Optagelsen viser også tre ting vi ikke havde regnet med:
 
 - **PC1 sender RST efter hver SYN-ACK.** nping sender SYN-pakkerne uden om Windows' TCP-stak. Når PC3 svarer med SYN-ACK, kender Windows ikke forbindelsen og svarer med RST. Derfor lukker PC3 hver halvåbne forbindelse med det samme, og webserveren blev ikke overbelastet. Angrebet kan opdages, men det lammer ikke serveren. Et rigtigt angreb bruger falske afsenderadresser, så ingen svarer med RST.
 - **Samme kildeport hele vejen.** nping brugte port 9380 til alle 10.000 pakker. SRX'en så det derfor som én session, og antallet af sessioner steg ikke (17 under angrebet, se `srx-output.txt`).
+- **Nogle pakker står der to gange som "TCP Retransmission".** Fx 40/41 (SYN) og 42/43 (SYN-ACK) i `wireshark-synflood.png`. Det er ikke spejlingen der kopierer dem to gange, selvom filteret sidder både som input og output. Optagelsen har præcis 10.000 SYN, 10.000 SYN-ACK og 10.000 RST, ligesom `-c 10000` i nping. Hvis routeren spejlede en pakke to gange, ville der være flere. Forklaringen er at nping sender den samme SYN hver gang: samme kildeport, samme IP-ID og samme sekvensnummer. Når to SYN når PC3 før RST'en, ser Linux den anden som en genudsendt SYN og sender den samme SYN-ACK igen. Wireshark kan ikke skelne dem og markerer begge par som retransmission. 44/45 er to rigtige RST'er fra PC1 med hvert sit IP-ID, én for hver SYN-ACK. Det skete 261 gange: de 10.000 SYN-ACK har kun 9.739 forskellige sekvensnumre. HTTP-optagelsen har samme filter og ingen dubletter.
 
