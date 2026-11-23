@@ -1,6 +1,6 @@
 # LLD – Assignment 35 (SRX port mirroring og IDS)
 
-Enhederne svarer til [HLD'en](HLD.pdf).
+Enhederne svarer til [HLD'en](../HLD.pdf).
 
 ## R1 / SRX-C1 – routede interfaces
 
