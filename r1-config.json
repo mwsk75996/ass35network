@@ -1,4 +1,5 @@
 {
+  "version": "12.1X46-D55.3",
   "system": {
     "host-name": "SRX-C1",
     "root-authentication": {
@@ -43,11 +44,11 @@
         "0": {
           "family": {
             "inet": {
-              "address": "192.168.4.1/24",
               "filter": {
                 "input": "my-port-filter",
                 "output": "my-port-filter"
-              }
+              },
+              "address": "192.168.4.1/24"
             }
           }
         }
@@ -166,26 +167,6 @@
       }
     }
   },
-  "firewall": {
-    "filter": {
-      "my-port-filter": {
-        "term": {
-          "myMirrorTerm": {
-            "from": {
-              "source-address": [
-                "0.0.0.0/0"
-              ]
-            },
-            "then": {
-              "count": "mirror-count",
-              "port-mirror": {},
-              "accept": {}
-            }
-          }
-        }
-      }
-    }
-  },
   "routing-options": {
     "static": {
       "route": {
@@ -202,8 +183,8 @@
           "soho": {
             "from": {
               "zone": [
-                "USERLAN",
-                "DMZ"
+                "DMZ",
+                "USERLAN"
               ]
             },
             "to": {
@@ -239,11 +220,13 @@
               "to-web": {
                 "match": {
                   "destination-address": "10.56.16.85/32",
-                  "destination-port": "80"
+                  "destination-port": 80
                 },
                 "then": {
                   "destination-nat": {
-                    "pool": "webserver-pool"
+                    "pool": [
+                      "webserver-pool"
+                    ]
                   }
                 }
               }
@@ -252,56 +235,60 @@
         }
       }
     },
-    "policies": [
-      {
-        "from-zone": "USERLAN",
-        "to-zone": "untrust",
-        "policy": {
-          "permit-internet": {
-            "match": {
-              "source-address": "any",
-              "destination-address": "any",
-              "application": "any"
+    "policies": {
+      "from-zone": {
+        "USERLAN": {
+          "to-zone": {
+            "untrust": {
+              "policy": {
+                "permit-internet": {
+                  "match": {
+                    "source-address": "any",
+                    "destination-address": "any",
+                    "application": "any"
+                  },
+                  "then": {
+                    "permit": {}
+                  }
+                }
+              }
             },
-            "then": {
-              "permit": {}
+            "DMZ": {
+              "policy": {
+                "permit-web": {
+                  "match": {
+                    "source-address": "any",
+                    "destination-address": "any",
+                    "application": "any"
+                  },
+                  "then": {
+                    "permit": {}
+                  }
+                }
+              }
             }
           }
-        }
-      },
-      {
-        "from-zone": "USERLAN",
-        "to-zone": "DMZ",
-        "policy": {
-          "permit-web": {
-            "match": {
-              "source-address": "any",
-              "destination-address": "any",
-              "application": "any"
-            },
-            "then": {
-              "permit": {}
-            }
-          }
-        }
-      },
-      {
-        "from-zone": "untrust",
-        "to-zone": "DMZ",
-        "policy": {
-          "permit-web-dnat": {
-            "match": {
-              "source-address": "any",
-              "destination-address": "webserver",
-              "application": "junos-http"
-            },
-            "then": {
-              "permit": {}
+        },
+        "untrust": {
+          "to-zone": {
+            "DMZ": {
+              "policy": {
+                "permit-web-dnat": {
+                  "match": {
+                    "source-address": "any",
+                    "destination-address": "webserver",
+                    "application": "junos-http"
+                  },
+                  "then": {
+                    "permit": {}
+                  }
+                }
+              }
             }
           }
         }
       }
-    ],
+    },
     "zones": {
       "security-zone": {
         "USERLAN": {
@@ -315,6 +302,11 @@
           ]
         },
         "DMZ": {
+          "address-book": {
+            "address": {
+              "webserver": "192.168.4.10/32"
+            }
+          },
           "host-inbound-traffic": {
             "system-services": [
               "ping"
@@ -322,12 +314,7 @@
           },
           "interfaces": [
             "ge-0/0/2.0"
-          ],
-          "address-book": {
-            "address": {
-              "webserver": "192.168.4.10/32"
-            }
-          }
+          ]
         },
         "untrust": {
           "host-inbound-traffic": {
@@ -348,6 +335,26 @@
           "interfaces": [
             "ge-0/0/4.0"
           ]
+        }
+      }
+    }
+  },
+  "firewall": {
+    "filter": {
+      "my-port-filter": {
+        "term": {
+          "myMirrorTerm": {
+            "from": {
+              "source-address": [
+                "0.0.0.0/0"
+              ]
+            },
+            "then": {
+              "count": "mirror-count",
+              "port-mirror": {},
+              "accept": {}
+            }
+          }
         }
       }
     }

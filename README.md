@@ -10,11 +10,9 @@ Bygger videre på [Assignment 34](https://github.com/mwsk75996/ass34network). Al
 
 ## Konfiguration (R1 / SRX-C1)
 
-| Fil | Indhold |
-|---|---|
-| [`r1-config.json`](r1-config.json) | Konfigurationen i JSON |
-| [`r1-config.conf`](r1-config.conf) | Kørende konfiguration (`show configuration`) |
-| [`r1-config.set`](r1-config.set) | Set-kommandoer, indlæses med `load set terminal` |
+[`r1-config.json`](r1-config.json): den kørende konfiguration fra SRX-C1 (`show configuration`) i JSON.
+
+Skal den indlæses kommando for kommando, ligger den som set-kommandoer i [`dokumentation/r1-config.set`](dokumentation/r1-config.set).
 
 ## Dokumentation
 

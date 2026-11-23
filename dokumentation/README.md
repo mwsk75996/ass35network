@@ -63,7 +63,8 @@ Se [pc4-opsaetning.md](pc4-opsaetning.md). Kort fortalt: kablet i ge-0/0/4, stat
 | Fil / mappe | Indhold |
 |---|---|
 | [`LLD.md`](LLD.md) | Interfaces, zoner, policies, NAT og port mirroring |
-| [`set-commands.md`](set-commands.md) | Set-kommandoerne fra `r1-config.set` med forklaring |
+| [`r1-config.set`](r1-config.set) | Konfigurationen som set-kommandoer, indlæses med `load set terminal` |
+| [`set-commands.md`](set-commands.md) | De samme set-kommandoer med forklaring |
 | [`pc4-opsaetning.md`](pc4-opsaetning.md) | Hvordan PC4 sættes op og køres (Wireshark + Snort) |
 | [`snort/`](snort/) | Snort-regel til SYN flood |
 | [`optagelser/`](optagelser/) | Wireshark-optagelser fra PC4 (HTTP, SYN flood og første test) |
