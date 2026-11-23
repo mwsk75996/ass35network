@@ -67,8 +67,8 @@ Se [pc4-opsaetning.md](pc4-opsaetning.md). Kort fortalt: kablet i ge-0/0/4, stat
 | `r1-config.conf` | Den kørende konfiguration hentet fra SRX-C1 med `show configuration` |
 | `r1-config.set` | Set-kommandoer, kan indlæses med `load set terminal` |
 | `set-commands.md` | Samme set-kommandoer til læsning |
-| `HLD.pdf` | Side 1: HLD med zoner og mirror-vej. Side 2: logisk diagram. Side 3: diagram i samme stil som opgavens tegning |
-| `HLD.svg` | HLD som SVG (eksporteret fra Visio) |
+| `HLD.pdf` | HLD med zoner, adresser og mirror-vej |
+| `HLD.svg` | Samme HLD som SVG (eksporteret fra Visio) |
 | `topology.jpg` / `logic.jpg` / `diagram.jpg` | De tre diagrammer som billeder |
 | `LLD.md` | Interfaces, zoner, policies, NAT og port mirroring |
 | `pc4-opsaetning.md` | Hvordan PC4 sættes op og køres (Wireshark + Snort) |
@@ -96,7 +96,7 @@ Se [pc4-opsaetning.md](pc4-opsaetning.md). Kort fortalt: kablet i ge-0/0/4, stat
 
 ## Spejlet trafik
 
-Optaget 2026-11-17 på PC4 (`enp0s31f6`) med `dumpcap -i enp0s31f6 -a duration:12 -w dmz-mirror-http.pcapng`. PC3 kørte en webserver på port 80 (`sudo python3 -m http.server 80`). Imens hentede PC4 selv `http://10.56.16.85/` over sit Wi-Fi-kort (`wlan0`, 10.228.31.98 på skolens Wi-Fi). Forespørgslen gik over skolens net og LabLan ind på ge-0/0/3, altså samme vej som fra en maskine på LabLan. Klienten er tegnet med grøn prikket linje i `HLD.pdf`. Destination NAT sender forespørgslen videre ud af ge-0/0/2 til PC3, og derfor bliver den spejlet til PC4.
+Optaget 2026-11-17 på PC4 (`enp0s31f6`) med `dumpcap -i enp0s31f6 -a duration:12 -w dmz-mirror-http.pcapng`. PC3 kørte en webserver på port 80 (`sudo python3 -m http.server 80`). Imens hentede PC4 selv `http://10.56.16.85/` over sit Wi-Fi-kort (`wlan0`, 10.228.31.98 på skolens Wi-Fi). Forespørgslen gik over skolens net og LabLan ind på ge-0/0/3, altså samme vej som fra en maskine på LabLan. Klienten er tegnet med stiplet linje til LabLan i `HLD.pdf`. Destination NAT sender forespørgslen videre ud af ge-0/0/2 til PC3, og derfor bliver den spejlet til PC4.
 
 ```
  2  10.228.31.98 → 192.168.4.10  TCP   40710 → 80 [SYN]
