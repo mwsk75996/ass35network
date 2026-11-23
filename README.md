@@ -68,6 +68,7 @@ Se [pc4-opsaetning.md](pc4-opsaetning.md). Kort fortalt: kablet i ge-0/0/4, stat
 | `r1-config.set` | Set-kommandoer, kan indlæses med `load set terminal` |
 | `set-commands.md` | Samme set-kommandoer til læsning |
 | `HLD.pdf` | Side 1: HLD med zoner og mirror-vej. Side 2: logisk diagram. Side 3: diagram i samme stil som opgavens tegning |
+| `HLD.svg` | HLD som SVG (eksporteret fra Visio) |
 | `topology.jpg` / `logic.jpg` / `diagram.jpg` | De tre diagrammer som billeder |
 | `LLD.md` | Interfaces, zoner, policies, NAT og port mirroring |
 | `pc4-opsaetning.md` | Hvordan PC4 sættes op og køres (Wireshark + Snort) |
