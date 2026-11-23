@@ -8,6 +8,7 @@ Konfigurationen er Assignment 34 plus port mirroring. Står Assignment 34 allere
 
 ```
 set system host-name SRX-C1
+set system root-authentication encrypted-password "$1$SR3ZnULH$cgcdTPXK7ModJJor1WKyE1"
 set system services ssh
 set system services dhcp pool 192.168.3.0/24 address-range low 192.168.3.100
 set system services dhcp pool 192.168.3.0/24 address-range high 192.168.3.200
